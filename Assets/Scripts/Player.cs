@@ -8,6 +8,7 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     CharacterController controller;
+    Fire playerFire;
 
     [Header("Player Settings")]
     [Space(2)]
@@ -31,6 +32,7 @@ public class Player : MonoBehaviour
         try 
         {
             controller = GetComponent<CharacterController>();
+            playerFire = GetComponent<Fire>();
             controller.minMoveDistance = 0.0f;
 
             if (speed <= 0) 
@@ -101,12 +103,20 @@ public class Player : MonoBehaviour
     void Fire()
     {
         Debug.Log("You may fire when ready");
+        playerFire.FireProjectile();
     }
 
     [ContextMenu("Reset Stats")]
     void ResetStats()
     {
         speed = 6.0f;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "EnemyCollider")
+            Debug.Log("Player Dies");
+            Destroy(gameObject);
     }
 
     private void OnTriggerEnter(Collider other)

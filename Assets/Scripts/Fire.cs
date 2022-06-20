@@ -17,6 +17,10 @@ public class Fire : MonoBehaviour
 
     public LayerMask layersToCheck;
 
+   public float startingVectorOffset = -45;
+   public int numOfLines = 16;
+   public int degToRotate = 90;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -26,17 +30,31 @@ public class Fire : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        RaycastHit hitInfo;
 
-        if(Physics.Raycast(rayOrigin.transform.position, transform.forward, out hitInfo, 10.0f, layersToCheck))
+        RaycastHit[] hitInfo = new RaycastHit[numOfLines];
+
+        float degPerLine = (float)degToRotate / (float)numOfLines;
+
+        rayOrigin.transform.Rotate(Vector3.up, startingVectorOffset);
+
+        for (int i = 0; i < numOfLines; i++)
         {
-            Debug.Log("Hit" + hitInfo.transform.gameObject.name);
-
-            hitInfo.transform.gameObject.SetActive(false);
+            Physics.Raycast(rayOrigin.transform.position, rayOrigin.transform.forward, out hitInfo[i], 10.0f, layersToCheck);
+            Debug.DrawRay(rayOrigin.transform.position, rayOrigin.transform.forward * 10.0f, Color.red, 0.5f);
+            rayOrigin.transform.Rotate(Vector3.up, degPerLine);
         }
-        Vector3 endPos = transform.forward * 10.0f;
 
-        Debug.DrawRay(rayOrigin.transform.position, endPos, Color.red);
+        rayOrigin.transform.Rotate(Vector3.up, startingVectorOffset);
+
+        //if (Physics.Raycast(rayOrigin.transform.position, transform.forward, out hitInfo, 10.0f, layersToCheck))
+        //{
+        //    Debug.Log("Hit" + hitInfo.transform.gameObject.name);
+
+        //    hitInfo.transform.gameObject.SetActive(false);
+        //}
+        //Vector3 endPos = transform.forward * 10.0f;
+
+        //Debug.DrawRay(rayOrigin.transform.position, endPos, Color.red);
     }
 
     public void FireProjectile()

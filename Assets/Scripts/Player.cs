@@ -9,6 +9,7 @@ public class Player : MonoBehaviour
 {
     CharacterController controller;
     Fire playerFire;
+    Animator anim;
 
     [Header("Player Settings")]
     [Space(2)]
@@ -33,6 +34,7 @@ public class Player : MonoBehaviour
         {
             controller = GetComponent<CharacterController>();
             playerFire = GetComponent<Fire>();
+            anim = GetComponentInChildren<Animator>();
             controller.minMoveDistance = 0.0f;
 
             if (speed <= 0) 
@@ -72,14 +74,28 @@ public class Player : MonoBehaviour
         {
             Debug.Log("Always Gets Called");
         }
+        
+        Debug.Log(anim.gameObject.name);
     }
 
     // Update is called once per frame
     void Update()
     {
+        AnimatorClipInfo[] curAnim = anim.GetCurrentAnimatorClipInfo(0);
         if (controller.isGrounded)
         {
-            moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+            if (curAnim.Length > 0)
+            {
+                if (curAnim[0].clip.name != "Cross Punch")
+                    moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+                else
+                    moveDirection = Vector3.zero;
+            }
+            
+            anim.SetFloat("Horizontal", moveDirection.x);
+            anim.SetFloat("Vertical", moveDirection.z);
+
+
 
             moveDirection *= speed;
             moveDirection = transform.TransformDirection(moveDirection);
@@ -87,24 +103,27 @@ public class Player : MonoBehaviour
             if (Input.GetButtonDown("Jump"))
                 moveDirection.y = jumpSpeed;
         }
-        else
-        {
-            moveDirection.x = Input.GetAxis("Horizontal") * speed;
-            moveDirection.z = Input.GetAxis("Vertical") * speed;
-        }
+        //else
+        //{
+        //    moveDirection.x = Input.GetAxis("Horizontal") * speed;
+        //    moveDirection.z = Input.GetAxis("Vertical") * speed;
+        //}
 
         moveDirection.y -= gravity * Time.deltaTime;
+
+
         controller.Move(moveDirection * Time.deltaTime);
 
         if (Input.GetButtonDown("Fire1"))
-            Fire();
+            anim.SetTrigger("Attack");
     }
 
-    void Fire()
-    {
-        Debug.Log("You may fire when ready");
-        playerFire.FireProjectile();
-    }
+    //void Fire()
+    //{
+    //    Debug.Log("You may fire when ready");
+    //    playerFire.FireProjectile();
+    //    anim.SetTrigger("Attack");
+    //}
 
     [ContextMenu("Reset Stats")]
     void ResetStats()
@@ -123,5 +142,7 @@ public class Player : MonoBehaviour
     {
         if (other.gameObject.tag == "Finish")
             Debug.Log("Game End");
+        SceneManager.LoadScene("GameOver");
+
     }
 }
